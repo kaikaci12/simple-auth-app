@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     authenticated: null,
   });
 
-  // Load token when app starts
+  //
   useEffect(() => {
     const loadToken = async () => {
       const token = await SecureStore.getItemAsync(TOKEN_KEY);
@@ -76,5 +76,4 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Hook to access auth context
 export const useAuth = () => useContext(AuthContext);

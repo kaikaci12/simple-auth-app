@@ -9,9 +9,10 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import "react-native-reanimated";
-
+import { AuthProvider } from "./context/AuthProvider";
 import { useColorScheme } from "@/hooks/useColorScheme";
-
+import { useAuth } from "./context/AuthProvider";
+import { Button } from "react-native";
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
@@ -30,16 +31,32 @@ export default function RootLayout() {
   if (!loaded) {
     return null;
   }
+  const { authState, onLogin, onLogout } = useAuth();
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="signUp" options={{ headerShown: false }} />
-        <Stack.Screen name="signIn" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="light" backgroundColor="blue" />
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+
+          {authState?.authenticated ? (
+            <Stack.Screen
+              name="(app)/home.tsx"
+              options={{
+                headerShown: false,
+                headerRight: () => (
+                  <Button onPress={onLogout} title="SignOut" />
+                ),
+              }}
+            />
+          ) : (
+            <Stack.Screen name="signIn" options={{ headerShown: false }} />
+          )}
+
+          <Stack.Screen name="+not-found" />
+        </Stack>
+        <StatusBar style="light" backgroundColor="blue" />
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
