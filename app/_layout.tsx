@@ -4,7 +4,7 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
@@ -12,22 +12,29 @@ import "react-native-reanimated";
 import AuthProvider from "./context/AuthProvider";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useAuth } from "./context/AuthProvider";
-import { Button } from "react-native";
+import { Button, Pressable, TouchableOpacity } from "react-native";
 
 SplashScreen.preventAutoHideAsync();
 
 function AppContent() {
+  const router = useRouter();
   const { authState, onLogout } = useAuth();
   console.log(authState);
+
+  useEffect(() => {
+    if (authState?.authenticated) {
+      router.push("/(app)/home");
+    }
+  }, [authState?.authenticated, router]);
   return (
     <>
       <Stack>
         {authState?.authenticated ? (
           <Stack.Screen
-            name="(app)/home.tsx"
+            name="(app)/home"
             options={{
-              headerShown: false,
-              headerRight: () => <Button onPress={onLogout} title="SignOut" />,
+              headerLeft: () => <Button onPress={onLogout} title="SignOut" />,
+              headerTitle: () => null,
             }}
           />
         ) : (
