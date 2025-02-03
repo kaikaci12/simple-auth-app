@@ -5,7 +5,7 @@ interface AuthProps {
   authState?: { token: string | null; authenticated: boolean | null };
   onRegister?: (
     email: string,
-    username: string,
+
     password: string
   ) => Promise<any>;
   onLogin?: (email: string, password: string) => Promise<any>;

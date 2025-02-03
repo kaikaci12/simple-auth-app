@@ -16,13 +16,13 @@ import { Link, useRouter } from "expo-router";
 import { useAuth } from "./context/AuthProvider";
 const SignUp = () => {
   const router = useRouter();
-  const [username, setUsername] = useState("");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [buttonAnim] = useState(new Animated.Value(1));
   const { onRegister } = useAuth();
   const handleSignUp = async () => {
-    const result = await onRegister!(email, password, username);
+    const result = await onRegister!(email, password);
     if (result && result.error) {
       alert(result.msg);
     }
@@ -56,13 +56,6 @@ const SignUp = () => {
         />
         <Text style={styles.title}>Create Account</Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Username"
-          placeholderTextColor="#bbb"
-          value={username}
-          onChangeText={setUsername}
-        />
         <TextInput
           style={styles.input}
           placeholder="Email"

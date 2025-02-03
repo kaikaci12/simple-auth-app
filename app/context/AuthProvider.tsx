@@ -4,7 +4,8 @@ import React, {
   type PropsWithChildren,
   useContext,
 } from "react";
-import SecureStore from "expo-secure-store";
+import * as SecureStore from "expo-secure-store";
+
 import { auth } from "@/firebaseConfig"; // Import the auth instance from firebaseConfig
 import {
   getAuth,
@@ -79,7 +80,7 @@ const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       console.log("User logged in successfully, Token:", token);
       await SecureStore.setItemAsync(TOKEN_KEY, token);
     } catch (error) {
-      console.log("Invalid Credentials", error);
+      throw new Error("Invalid credentials");
     }
   };
 

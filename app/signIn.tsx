@@ -13,10 +13,10 @@ const SignIn = () => {
   const { onLogin } = useAuth();
 
   const handleSignIn = async () => {
-    const result = await onLogin!(email, password);
-
-    if (result && result.eror) {
-      alert(result.msg);
+    try {
+      await onLogin!(email, password);
+    } catch (error: any) {
+      alert(error.message);
     }
   };
 
