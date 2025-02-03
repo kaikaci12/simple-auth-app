@@ -5,6 +5,13 @@ import React, {
   useContext,
 } from "react";
 import SecureStore from "expo-secure-store";
+import { auth } from "@/firebaseConfig"; // Import the auth instance from firebaseConfig
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
 import AuthContext from "./AuthContext";
 
 const TOKEN_KEY = "my-jwt";
@@ -19,7 +26,6 @@ const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     authenticated: null,
   });
 
-  //
   useEffect(() => {
     const loadToken = async () => {
       const token = await SecureStore.getItemAsync(TOKEN_KEY);
@@ -34,37 +40,66 @@ const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     loadToken();
   }, []);
 
-  // Register function (placeholder)
+  // Register function using Firebase Auth
   const register = async (
     email: string,
     password: string,
     username: string
   ) => {
-    console.log("Registering user:", { email, username, password });
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      console.log("User registered:", user);
+      // Store token (you can use getIdToken or custom claims if needed)
+      const token = await user.getIdToken();
+      setAuthState({
+        token,
+        authenticated: true,
+      });
+      await SecureStore.setItemAsync(TOKEN_KEY, token);
+    } catch (error) {
+      console.error("Registration error:", error);
+    }
   };
 
-  // Login function
+  // Login function using Firebase Auth
   const login = async (email: string, password: string) => {
-    setAuthState({
-      token: "mock-jwt-token",
-      authenticated: true,
-    });
-    console.log("User logged in successfully");
-
-    // Save token securely
-    await SecureStore.setItemAsync(TOKEN_KEY, "mock-jwt-token");
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      const token = await user.getIdToken();
+      setAuthState({
+        token,
+        authenticated: true,
+      });
+      console.log("User logged in successfully, Token:", token);
+      await SecureStore.setItemAsync(TOKEN_KEY, token);
+    } catch (error) {
+      console.error("Login error:", error);
+    }
   };
 
-  // Logout function
+  // Logout function using Firebase Auth
   const logOut = async () => {
-    setAuthState({
-      token: null,
-      authenticated: false,
-    });
-    console.log("User logged out successfully");
-
-    // Remove token from secure storage
-    await SecureStore.deleteItemAsync(TOKEN_KEY);
+    try {
+      await signOut(auth);
+      setAuthState({
+        token: null,
+        authenticated: false,
+      });
+      console.log("User logged out successfully");
+      await SecureStore.deleteItemAsync(TOKEN_KEY);
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   // Value passed to AuthContext.Provider
@@ -77,5 +112,6 @@ const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
+
 export default AuthProvider;
 export const useAuth = () => useContext(AuthContext);

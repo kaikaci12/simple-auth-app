@@ -24,8 +24,11 @@ function AppContent() {
   useEffect(() => {
     if (authState?.authenticated) {
       router.push("/(app)/home");
+    } else {
+      router.replace("/signIn");
     }
   }, [authState?.authenticated, router]);
+
   return (
     <>
       <Stack>
