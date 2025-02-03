@@ -4,29 +4,19 @@ import { Button } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Link, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAuth } from "./context/AuthProvider";
 
 const SignIn = () => {
   const router = useRouter();
-  const [username, setUsername] = useState("");
+  const [email, setemail] = useState("");
   const [password, setPassword] = useState("");
+  const { onLogin } = useAuth();
 
   const handleSignIn = async () => {
-    try {
-      const userData = await AsyncStorage.getItem("@user_data");
-      if (userData) {
-        const { username: storedUsername, password: storedPassword } =
-          JSON.parse(userData);
-        if (username === storedUsername && password === storedPassword) {
-          alert("Login successful!");
-          router.push("/(app)/home");
-        } else {
-          alert("Invalid username or password");
-        }
-      } else {
-        alert("No account found. Please sign up first.");
-      }
-    } catch (error) {
-      console.error("Error reading data from AsyncStorage", error);
+    const result = await onLogin!(email, password);
+
+    if (result && result.eror) {
+      alert(result.msg);
     }
   };
 
@@ -39,9 +29,9 @@ const SignIn = () => {
 
       <TextInput
         style={styles.input}
-        placeholder="Username"
-        value={username}
-        onChangeText={setUsername}
+        placeholder="email"
+        value={email}
+        onChangeText={setemail}
       />
       <TextInput
         style={styles.input}

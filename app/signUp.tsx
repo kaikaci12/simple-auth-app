@@ -13,22 +13,18 @@ import { Ionicons } from "@expo/vector-icons";
 import { Animated } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, useRouter } from "expo-router";
+import { useAuth } from "./context/AuthProvider";
 const SignUp = () => {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [buttonAnim] = useState(new Animated.Value(1));
-
+  const { onRegister } = useAuth();
   const handleSignUp = async () => {
-    const userData = { username, email, password };
-    try {
-      const jsonValue = JSON.stringify(userData);
-      await AsyncStorage.setItem("@user_data", jsonValue);
-      console.log("User data saved successfully!", jsonValue);
-      router.push("/signIn");
-    } catch (e) {
-      console.error("Error saving data to AsyncStorage", e);
+    const result = await onRegister!(email, password, username);
+    if (result && result.error) {
+      alert(result.msg);
     }
   };
 

@@ -5,12 +5,12 @@ import React, {
   useContext,
 } from "react";
 import SecureStore from "expo-secure-store";
-import { AuthContext } from "./authContext";
+import AuthContext from "./AuthContext";
 
 const TOKEN_KEY = "my-jwt";
 
 // AuthProvider Component
-export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
+const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   const [authState, setAuthState] = useState<{
     token: string | null;
     authenticated: boolean | null;
@@ -35,14 +35,16 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   }, []);
 
   // Register function (placeholder)
-  const register = async (email: string, password: string) => {
-    console.log("Registering user:", email);
-    // Add registration logic here
+  const register = async (
+    email: string,
+    password: string,
+    username: string
+  ) => {
+    console.log("Registering user:", { email, username, password });
   };
 
   // Login function
   const login = async (email: string, password: string) => {
-    // Mock login logic, replace with actual API call
     setAuthState({
       token: "mock-jwt-token",
       authenticated: true,
@@ -75,5 +77,5 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-
+export default AuthProvider;
 export const useAuth = () => useContext(AuthContext);
