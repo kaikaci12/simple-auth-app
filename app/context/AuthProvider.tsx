@@ -41,11 +41,7 @@ const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   }, []);
 
   // Register function using Firebase Auth
-  const register = async (
-    email: string,
-    password: string,
-    username: string
-  ) => {
+  const register = async (email: string, password: string) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -54,7 +50,7 @@ const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       );
       const user = userCredential.user;
       console.log("User registered:", user);
-      // Store token (you can use getIdToken or custom claims if needed)
+
       const token = await user.getIdToken();
       setAuthState({
         token,
@@ -83,7 +79,7 @@ const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       console.log("User logged in successfully, Token:", token);
       await SecureStore.setItemAsync(TOKEN_KEY, token);
     } catch (error) {
-      console.error("Login error:", error);
+      console.log("Invalid Credentials", error);
     }
   };
 
@@ -98,7 +94,7 @@ const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       console.log("User logged out successfully");
       await SecureStore.deleteItemAsync(TOKEN_KEY);
     } catch (error) {
-      console.error("Logout error:", error);
+      console.log("Logout error:", error);
     }
   };
 
