@@ -28,7 +28,12 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   useEffect(() => {
     const loadToken = async () => {
       const token = await SecureStore.getItemAsync(TOKEN_KEY);
+      console.log("stored token", token);
       if (token) {
+        setAuthState({
+          token: token,
+          authenticated: true,
+        });
       }
     };
     loadToken();
