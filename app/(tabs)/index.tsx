@@ -1,6 +1,14 @@
-import { ActivityIndicator, View } from "react-native";
+import {
+  ActivityIndicator,
+  TouchableOpacity,
+  View,
+  Text,
+  StyleSheet,
+} from "react-native";
 import { Link, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import { GoogleSigninButton } from "@react-native-google-signin/google-signin";
 
 function Home() {
   const router = useRouter();
@@ -37,7 +45,26 @@ function Home() {
       >
         Sign Up
       </Link>
+      <GoogleSigninButton
+        size={GoogleSigninButton.Size.Wide}
+        color={GoogleSigninButton.Color.Dark}
+        onPress={() => {
+          // initiate sign in
+        }}
+        disabled={isInProgress}
+      />
+      ;
     </View>
   );
 }
+const styles = StyleSheet.create({
+  google: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    backgroundColor: "#4285F4",
+    borderRadius: 5,
+    marginTop: 10,
+  },
+});
 export default Home;

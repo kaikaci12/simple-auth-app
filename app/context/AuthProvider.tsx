@@ -8,11 +8,16 @@ import * as SecureStore from "expo-secure-store";
 
 import { auth } from "@/firebaseConfig"; // Import the auth instance from firebaseConfig
 import {
-  getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
+import {
+  GoogleSignin,
+  GoogleSigninButton,
+  GoogleSigninButtonProps,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
 import AuthContext from "./AuthContext";
 
 const TOKEN_KEY = "my-jwt";
@@ -53,6 +58,7 @@ const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       console.log("User registered:", user);
 
       const token = await user.getIdToken();
+
       setAuthState({
         token,
         authenticated: true,
@@ -63,7 +69,6 @@ const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     }
   };
 
-  // Login function using Firebase Auth
   const login = async (email: string, password: string) => {
     try {
       const userCredential = await signInWithEmailAndPassword(
@@ -84,7 +89,6 @@ const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     }
   };
 
-  // Logout function using Firebase Auth
   const logOut = async () => {
     try {
       await signOut(auth);
