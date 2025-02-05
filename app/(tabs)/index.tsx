@@ -1,70 +1,102 @@
-import {
-  ActivityIndicator,
-  TouchableOpacity,
-  View,
-  Text,
-  StyleSheet,
-} from "react-native";
-import { Link, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
-import AntDesign from "@expo/vector-icons/AntDesign";
-import { GoogleSigninButton } from "@react-native-google-signin/google-signin";
+import React, { useEffect, useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import * as AuthSession from "expo-auth-session";
+import { useRouter } from "expo-router";
 
-function Home() {
+export default function Home() {
+  const [userInfo, setUserInfo] = useState(null);
   const router = useRouter();
+
+  const [request, response, promptAsync] = AuthSession.useAuthRequest({
+    clientId: "YOUR_GITHUB_CLIENT_ID", // Replace with your GitHub Client ID
+    redirectUri: AuthSession.makeRedirectUri({
+      useProxy: true,
+    }),
+    scopes: ["user"],
+  });
+
+  useEffect(() => {
+    if (response?.type === "success") {
+      const { code } = response.params;
+      fetchGitHubUserInfo(code);
+    }
+  }, [response]);
+
+  const fetchGitHubUserInfo = async (code) => {
+    try {
+      // Step 1: Exchange the code for an access token
+      const tokenResponse = await fetch(
+        "https://github.com/login/oauth/access_token",
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            client_id: "YOUR_GITHUB_CLIENT_ID", // Replace with your GitHub Client ID
+            client_secret: "YOUR_GITHUB_CLIENT_SECRET", // Replace with your GitHub Client Secret
+            code,
+          }),
+        }
+      );
+      const { access_token } = await tokenResponse.json();
+
+      // Step 2: Use the token to fetch user info
+      const userResponse = await fetch("https://api.github.com/user", {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+      });
+      const user = await userResponse.json();
+      setUserInfo(user);
+      console.log("GitHub User Info:", user);
+
+      // Redirect or handle the user info as needed
+      router.push("/dashboard"); // Navigate to the dashboard
+    } catch (error) {
+      console.error("Error during GitHub authentication:", error);
+    }
+  };
+
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#f0f0f0",
-      }}
-    >
-      <Link
-        href="/signIn"
-        onPress={() => router.push("/signIn")}
-        style={{
-          padding: 10,
-          backgroundColor: "#6200ee",
-          color: "#ffffff",
-          borderRadius: 5,
-          marginBottom: 10,
-        }}
-      >
-        Sign in
-      </Link>
-      <Link
-        href="/signUp"
-        style={{
-          padding: 10,
-          backgroundColor: "#03dac6",
-          color: "#000000",
-          borderRadius: 5,
-        }}
-      >
-        Sign Up
-      </Link>
-      <GoogleSigninButton
-        size={GoogleSigninButton.Size.Wide}
-        color={GoogleSigninButton.Color.Dark}
-        onPress={() => {
-          // initiate sign in
-        }}
-        disabled={isInProgress}
-      />
-      ;
+    <View style={styles.container}>
+      {userInfo ? (
+        <View>
+          <Text style={styles.text}>Welcome, {userInfo.name}!</Text>
+          <Text style={styles.text}>Username: {userInfo.login}</Text>
+          <Text style={styles.text}>Email: {userInfo.email}</Text>
+        </View>
+      ) : (
+        <TouchableOpacity
+          disabled={!request}
+          onPress={() => promptAsync()}
+          style={styles.button}
+        >
+          <Text style={styles.buttonText}>Sign in with GitHub</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
+
 const styles = StyleSheet.create({
-  google: {
-    flexDirection: "row",
+  container: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#f0f0f0",
+  },
+  button: {
+    backgroundColor: "#24292f", // GitHub dark gray color
     padding: 10,
-    backgroundColor: "#4285F4",
     borderRadius: 5,
-    marginTop: 10,
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  text: {
+    fontSize: 18,
+    marginBottom: 10,
   },
 });
-export default Home;

@@ -12,12 +12,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
-import {
-  GoogleSignin,
-  GoogleSigninButton,
-  GoogleSigninButtonProps,
-  statusCodes,
-} from "@react-native-google-signin/google-signin";
+
 import AuthContext from "./AuthContext";
 
 const TOKEN_KEY = "my-jwt";
