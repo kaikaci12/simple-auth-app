@@ -14,10 +14,10 @@ import {
 } from "firebase/auth";
 
 import AuthContext from "./AuthContext";
-
+import * as Google from "expo-auth-session/providers/google";
+import { googleClientId, googleClientSecret } from "@/constants/google";
 const TOKEN_KEY = "my-jwt";
 
-// AuthProvider Component
 const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   const [authState, setAuthState] = useState<{
     token: string | null;
@@ -25,6 +25,12 @@ const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   }>({
     token: null,
     authenticated: null,
+  });
+
+  // Place Google.useAuthRequest inside the component
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    clientId: googleClientId,
+    clientSecret: googleClientSecret,
   });
 
   useEffect(() => {
