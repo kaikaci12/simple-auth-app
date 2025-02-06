@@ -8,125 +8,32 @@ import {
   Pressable,
 } from "react-native";
 import * as AuthSession from "expo-auth-session";
+import * as Google from "expo-auth-session/providers/google";
+import * as WebBrowser from "expo-web-browser";
 import { useRouter, Link } from "expo-router";
 import { AntDesign } from "@expo/vector-icons"; // Import the correct icon set
-import { githubData } from "@/constants/github";
-import { googleClientId } from "@/constants/google"; // Make sure to add this constant for Google OAuth
 
+import { webClientId, androidClientId } from "@/constants/google";
+WebBrowser.maybeCompleteAuthSession();
 export default function Home() {
+  const config = {
+    webClientId,
+    androidClientId,
+  };
   const [userInfo, setUserInfo] = useState<any>(null);
   const router = useRouter();
-  const { clientId, clientSecret } = githubData;
 
-  const githubDiscovery = {
-    authorizationEndpoint: "https://github.com/login/oauth/authorize",
-    tokenEndpoint: "https://github.com/login/oauth/access_token",
-    revocationEndpoint:
-      "https://github.com/settings/connections/applications/" + clientId,
+  const [request, response, promptAsync] = Google.useAuthRequest(config);
+  const handleToken = () => {
+    if (response?.type === "success") {
+      const { authentication } = response;
+      const token = authentication?.accessToken;
+      console.log("access token: ", token);
+    }
   };
-
-  const googleDiscovery = {
-    authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
-    tokenEndpoint: "https://oauth2.googleapis.com/token",
-  };
-
-  const [githubRequest, githubResponse, githubPromptAsync] =
-    AuthSession.useAuthRequest(
-      {
-        clientId: clientId,
-        redirectUri: AuthSession.makeRedirectUri(),
-        scopes: ["user"],
-      },
-      githubDiscovery
-    );
-
-  const [googleRequest, googleResponse, googlePromptAsync] =
-    AuthSession.useAuthRequest(
-      {
-        clientId: googleClientId,
-        redirectUri: AuthSession.makeRedirectUri(),
-        scopes: ["profile", "email"],
-      },
-      googleDiscovery
-    );
-
   useEffect(() => {
-    // Handle GitHub authentication response
-    if (githubResponse?.type === "success") {
-      const { code } = githubResponse.params;
-      fetchGitHubUserInfo(code);
-    }
-
-    // Handle Google authentication response
-    if (googleResponse?.type === "success") {
-      const { code } = googleResponse.params;
-      fetchGoogleUserInfo(code);
-    }
-  }, [githubResponse, googleResponse]);
-
-  const fetchGitHubUserInfo = async (code: any) => {
-    try {
-      const tokenResponse = await fetch(
-        "https://github.com/login/oauth/access_token",
-        {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-          },
-          body: JSON.stringify({
-            client_id: clientId,
-            client_secret: clientSecret,
-            code,
-          }),
-        }
-      );
-      const { access_token } = await tokenResponse.json();
-
-      const userResponse = await fetch("https://api.github.com/user", {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-        },
-      });
-      const user = await userResponse.json();
-      setUserInfo(user);
-      router.push("/(app)/home");
-    } catch (error) {
-      console.error("Error during GitHub authentication:", error);
-    }
-  };
-
-  const fetchGoogleUserInfo = async (code: any) => {
-    try {
-      const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          client_id: googleClientId,
-          code,
-          redirect_uri: AuthSession.makeRedirectUri(),
-          client_secret: "YOUR_GOOGLE_CLIENT_SECRET", // Ensure you have the secret here
-          grant_type: "authorization_code",
-        }),
-      });
-      const { access_token } = await tokenResponse.json();
-
-      const userResponse = await fetch(
-        "https://www.googleapis.com/oauth2/v1/userinfo",
-        {
-          headers: {
-            Authorization: `Bearer ${access_token}`,
-          },
-        }
-      );
-      const user = await userResponse.json();
-      setUserInfo(user);
-      router.push("/(app)/home");
-    } catch (error) {
-      console.error("Error during Google authentication:", error);
-    }
-  };
+    handleToken();
+  }, [response]);
 
   return (
     <View style={styles.container}>
@@ -153,18 +60,12 @@ export default function Home() {
         </View>
       ) : (
         <>
-          <Pressable
-            onPress={() => githubPromptAsync()}
-            style={styles.githubButton}
-          >
+          <Pressable onPress={() => {}} style={styles.githubButton}>
             <AntDesign name="github" size={28} color="white" />
             <Text style={styles.githubButtonText}>Sign in with GitHub</Text>
           </Pressable>
 
-          <Pressable
-            onPress={() => googlePromptAsync()}
-            style={styles.githubButton}
-          >
+          <Pressable onPress={() => promptAsync()} style={styles.githubButton}>
             <AntDesign name="google" size={28} color="white" />
             <Text style={styles.githubButtonText}>Sign in with Google</Text>
           </Pressable>
