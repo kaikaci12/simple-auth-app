@@ -10,6 +10,7 @@ interface AuthProps {
   ) => Promise<any>;
   onLogin?: (email: string, password: string) => Promise<any>;
   onLogout?: () => Promise<any>;
+  onGithubSignIn?: () => Promise<any>;
 }
 
 const AuthContext = createContext<AuthProps>({

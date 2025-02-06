@@ -12,7 +12,7 @@ import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import { useRouter, Link } from "expo-router";
 import { AntDesign } from "@expo/vector-icons"; // Import the correct icon set
-
+import { useAuth } from "../context/AuthProvider";
 import { webClientId, androidClientId } from "@/constants/google";
 WebBrowser.maybeCompleteAuthSession();
 export default function Home() {
@@ -34,7 +34,13 @@ export default function Home() {
   useEffect(() => {
     handleToken();
   }, [response]);
-
+  const { onGithubSignIn } = useAuth();
+  const handleSignInWithGithub = async () => {
+    const result = await onGithubSignIn!();
+    if (result && result.error) {
+      alert(result.msg);
+    }
+  };
   return (
     <View style={styles.container}>
       <Link href="/signIn" style={styles.linkButton}>
@@ -60,7 +66,10 @@ export default function Home() {
         </View>
       ) : (
         <>
-          <Pressable onPress={() => {}} style={styles.githubButton}>
+          <Pressable
+            onPress={handleSignInWithGithub}
+            style={styles.githubButton}
+          >
             <AntDesign name="github" size={28} color="white" />
             <Text style={styles.githubButtonText}>Sign in with GitHub</Text>
           </Pressable>

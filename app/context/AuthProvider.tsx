@@ -5,16 +5,16 @@ import React, {
   useContext,
 } from "react";
 import * as SecureStore from "expo-secure-store";
-
-import { auth } from "@/firebaseConfig"; // Import the auth instance from firebaseConfig
+import { auth } from "@/firebaseConfig";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
+  getAuth,
+  GithubAuthProvider,
+  signInWithPopup,
 } from "firebase/auth";
-
 import AuthContext from "./AuthContext";
-import { GithubAuthProvider } from "firebase/auth";
 
 const TOKEN_KEY = "my-jwt";
 
@@ -26,8 +26,6 @@ const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     token: null,
     authenticated: null,
   });
-
-  // Place Google.useAuthRequest inside the component
 
   useEffect(() => {
     const loadToken = async () => {
@@ -100,11 +98,29 @@ const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     }
   };
 
-  // Value passed to AuthContext.Provider
+  const githubSignIn = async () => {
+    try {
+      const provider = new GithubAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const token = await user.getIdToken();
+
+      setAuthState({
+        token,
+        authenticated: true,
+      });
+      console.log("User logged in with GitHub:", user);
+      await SecureStore.setItemAsync(TOKEN_KEY, token);
+    } catch (error) {
+      console.error("GitHub sign-in error:", error);
+    }
+  };
+
   const value = {
     onRegister: register,
     onLogin: login,
     onLogout: logOut,
+    onGithubSignIn: githubSignIn, // Expose GitHub sign-in function
     authState,
   };
 
